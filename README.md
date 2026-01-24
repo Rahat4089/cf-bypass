@@ -1,17 +1,12 @@
 # 🚀 ReX-Bypass: The Ultimate Cloudflare & Turnstile Solver
 
-![Performance Benchmark](.github/assets/benchmark_terminal_screenshot.png)
+![Performance Benchmark](.github/benchmark.png)
 
 ### 🎥 Live Demo
-<video src=".github/assets/demo_video.mp4" controls autoplay loop muted playsinline style="max-width: 100%;">
-  <a href=".github/assets/demo_video.mp4">Watch Demo Video</a>
+
+<video src=".github/demo.mp4" controls="controls" style="max-width: 100%;">
+  Your browser does not support the video tag.
 </video>
-<br>
-<sub>*If the video doesn't play automatically, [click here to watch](.github/assets/demo_video.mp4).*</sub>
-
-
-
-
 
 > [!IMPORTANT]
 > **NEED SUPPORT OR CUSTOM FEATURES?**
@@ -129,6 +124,8 @@ Check the benchmark image above. We consistently outperform standard tools by **
 
 *   **Average Solves:** ~1-3 seconds
 *   **Cached Solves:** ~0.02 seconds
+
+![Status of Test](.github/status_of_test.jpg)
 
 ---
 
