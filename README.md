@@ -1,35 +1,54 @@
-# CF Bypass API
+# 🚀 ReX-Bypass: The Ultimate Cloudflare & Turnstile Solver
 
-A robust Cloudflare bypass API using Puppeteer and Xvfb, designed to be deployed easily with Docker.
+![Performance Benchmark](benchmark_terminal_screenshot.png)
 
-## Description
+### 🎥 Live Demo
+### 🎥 Live Demo
+<video src="demo_video.mp4" controls autoplay loop muted playsinline style="max-width: 100%;">
+  <a href="demo_video.mp4">Watch Demo Video</a>
+</video>
+<br>
+<sub>*If the video doesn't play automatically, [click here to watch](demo_video.mp4).*</sub>
 
-This API provides a way to bypass Cloudflare protection (IUAM and Turnstile) by running a real browser instance. It supports caching to improve performance for repeated requests.
 
-## Prerequisites
 
--   [Docker](https://docs.docker.com/get-docker/)
--   [Bun](https://bun.sh/) (required for local development)
+> [!IMPORTANT]
+> **NEED SUPPORT OR CUSTOM FEATURES?**
+> 📩 **Contact & Updates:** [JOIN ReX UPDATES](https://t.me/ReX_update)
+> *We take requests! Message us for custom integrations.*
 
-### Install Bun
+## 🔥 Why Is This The Fastest API?
 
-If you don't have Bun installed, you can install it via terminal:
+Unlike generic solvers (FlareSolverr, Selenium), **ReX-Bypass** is engineered for **speed** and **stealth**.
 
-**Windows (PowerShell):**
-```powershell
-powershell -c "irm bun.sh/install.ps1 | iex"
-```
+| Feature | ReX-Bypass | Others | Why It Matters |
+| :--- | :--- | :--- | :--- |
+| **Runtime** | **Bun** (Zig-based) | Node.js | **3x Faster** startup & execution times. |
+| **Browser** | **Rebrowser-Puppeteer** | Standard Puppeteer | **Undetectable** by modern bot protection. |
+| **Stealth** | **Ghost Cursor** | None / Basic | Simulates **REAL** human mouse movements. |
+| **Efficiency** | **Smart Blocking** | Loads Everything | Blocks ads/media/fonts to save bandwidth. |
+| **Display** | **Xvfb (Headless)** | Full GUI | Zero overhead, runs efficiently on VPS/Docker. |
+| **Caching** | **In-Memory TTL** | No Caching | Instant results for repeated domains (0.04s). |
 
-**Linux / macOS:**
+---
+
+## ⚡ Deployment
+
+### Option 1: Docker (Recommended)
+
+Run it on any VPS in seconds.
+
 ```bash
-curl -fsSL https://bun.sh/install | bash
+# Build the image
+docker build -t rex-bypass .
+
+# Run the container (detached, port 3000)
+docker run -d -p 3000:3000 --name rex-bypass rex-bypass
 ```
 
+### Option 2: Local (Bun)
 
-
-### Development
-
-To run the project locally, you can use the following commands:
+Requires [Bun](https://bun.sh/) installed.
 
 ```bash
 # Install dependencies
@@ -37,78 +56,83 @@ bun install
 
 # Start the server
 bun start
-
-# Run tests
-bun run test
 ```
 
-### Install Docker on VPS
+---
 
-If you are using a VPS, you can easily install Docker with the following command:
-
-```bash
-curl -fsSL https://get.docker.com -o get-docker.sh
-sudo sh get-docker.sh
-```
-
-## Installation & Deployment
-
-### 1. Build the Docker Image
-
-Navigate to the project directory and run:
-
-```bash
-docker build -t cf-bypass .
-```
-
-### 2. Run the Container
-
-You can run the container using the standard `docker run` command:
-
-```bash
-docker run -d -p 3000:3000 --name cf-bypass cf-bypass
-```
-
-The API will be available at `http://localhost:3000`.
-
-### Configuration via Environment Variables
-
-You can configure the service using the following environment variables:
-
-| Variable       | Default | Description                                                                 |
-| :------------- | :------ | :-------------------------------------------------------------------------- |
-| `PORT`         | `3000`  | The port the server listens on.                                             |
-
-**Example running with custom config:**
-
-```bash
-docker run -d --name cf-bypass -p 3000:3000 cf-bypass
-
-```
-
-## API Usage
+## 🛠 API Documentation
 
 ### Endpoint: `/cloudflare`
-
 **Method:** `POST`
+**Headers:** `Content-Type: application/json`
 
-**Body:**
+### Mode 1: Bypass IUAM (Under Attack Mode)
 
+Use this for standard Cloudflare "Checking your browser" pages.
+
+**Request Body:**
 ```json
 {
-    "mode": "iuam", // or "turnstile"
-    "url": "https://target-website.com",
-    "ttl": 60000 // Optional: Cache time-to-live in ms (Default: 30 mins)
+    "mode": "iuam",
+    "domain": "https://target-website.com",
+    "proxy": {
+        "username": "user",  // Optional
+        "password": "pass"   // Optional
+    },
+    "ttl": 60000 // Cache this result for 60 seconds (Default: 30 mins)
 }
 ```
 
-**Response:**
+> **Note:** Use `domain` parameter, NOT `url`.
 
+**Response (Success):**
 ```json
 {
     "code": 200,
-    "token": "...",
-    "cookies": [...],
-    "elapsed": "1.23s"
+    "cf_clearance": "content-of-cf-clearance-cookie...",
+    "user_agent": "Mozilla/5.0 ...",
+    "cookies": [...], 
+    "elapsed": "0.82s",
+    "cached": false
 }
 ```
+
+### Mode 2: Bypass Turnstile (Captcha)
+
+Use this when you see the Cloudflare Turnstile widget.
+
+**Request Body:**
+```json
+{
+    "mode": "turnstile",
+    "domain": "https://target-website.com",
+    "siteKey": "0x4AAAAAA...",
+    "proxy": { ... } // Optional
+}
+```
+
+**Response (Success):**
+```json
+{
+    "code": 200,
+    "token": "0.X_TOKEN_HERE...",
+    "elapsed": "1.45s"
+}
+```
+
+---
+
+## 📸 Performance Preview
+
+Check the benchmark image above. We consistently outperform standard tools by **removing bloat** and **optimizing the browser fingerprint**.
+
+*   **Average Solves:** ~1-3 seconds
+*   **Cached Solves:** ~0.02 seconds
+
+---
+
+> [!TIP]
+> **STAY UPDATED**
+> New bypass methods are pushed regularly.
+> 🔗 **Channel:** [ReX Updates](https://t.me/ReX_update)
+
