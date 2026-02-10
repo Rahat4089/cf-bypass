@@ -3,8 +3,8 @@
   "version": "1.0",
   "description": "get the cf_clearance cookie from any website",
   "scripts": {
-    "start": "bun src/index.ts",
-    "test": "bun src/tests/test.ts"
+    "start": "npm src/index.ts",
+    "test": "npm src/tests/test.ts"
   },
   "dependencies": {
     "chrome-launcher": "^1.1.2",
