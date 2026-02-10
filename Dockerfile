@@ -26,4 +26,4 @@ RUN bun install --frozen-lockfile
 COPY . .
 
 # Start app
-CMD ["bun", "start"]
+CMD ["bun", "src/index.ts"]
