@@ -1,35 +1,58 @@
-name: Build Windows EXE
+name: Build Executable
 
 on:
   push:
-    branches: [ "main" ]
-  workflow_dispatch:
+    tags:
+      - 'v*'
+  workflow_dispatch: # Allows manual triggering
 
 jobs:
   build:
-    runs-on: windows-latest
-
+    strategy:
+      matrix:
+        os: [windows-latest]
+        # Add other platforms if needed:
+        # os: [windows-latest, ubuntu-latest, macos-latest]
+    
+    runs-on: ${{ matrix.os }}
+    
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Install nexe
-        run: npm install -g nexe
-
-      - name: Build EXE
-        run: nexe src/index.js -t windows-x64-18.0.0 -o cf-bypass.exe
-
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: cf-bypass-windows
-          path: cf-bypass.exe
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Setup Bun
+      uses: oven-sh/setup-bun@v1
+      with:
+        bun-version: latest
+    
+    - name: Install dependencies
+      run: bun install
+    
+    - name: Install compilation dependencies (Windows)
+      if: matrix.os == 'windows-latest'
+      run: |
+        bun add -d @vercel/ncc
+        bun add -d pkg
+        bun add -d pkg-fetch
+    
+    - name: Compile TypeScript and bundle
+      run: |
+        # Bundle the main file with all dependencies
+        bunx ncc build src/index.ts -o dist --target bun
+        
+        # Create a standalone executable with pkg
+        # Note: You might need to create a separate entry point for pkg
+        echo "require('./index.js')" > dist/entry.js
+        bunx pkg dist/entry.js --targets node18-win-x64 --output dist/cf-bypass.exe
+        
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: cf-bypass-${{ matrix.os }}
+        path: dist/
+        
+    - name: Create Release (on tag)
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: dist/cf-bypass.exe
