@@ -25,7 +25,8 @@ jobs:
         run: npm install -g nexe
 
       - name: Build EXE
-        run: nexe .\src\index.js -t windows-x64-18.0.0 -o cf-bypass.exe
+        run: nexe src/index.js -t windows-x64-18.0.0 -o cf-bypass.exe
+
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
