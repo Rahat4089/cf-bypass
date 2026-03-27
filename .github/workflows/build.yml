@@ -4,55 +4,55 @@ on:
   push:
     tags:
       - 'v*'
-  workflow_dispatch: # Allows manual triggering
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
     strategy:
       matrix:
         os: [windows-latest]
-        # Add other platforms if needed:
-        # os: [windows-latest, ubuntu-latest, macos-latest]
-    
+
     runs-on: ${{ matrix.os }}
-    
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
-    
+
     - name: Setup Bun
-      uses: oven-sh/setup-bun@v1
+      uses: oven-sh/setup-bun@v2
       with:
         bun-version: latest
-    
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
     - name: Install dependencies
       run: bun install
-    
-    - name: Install compilation dependencies (Windows)
-      if: matrix.os == 'windows-latest'
+
+    - name: Bundle with ncc
       run: |
-        bun add -d @vercel/ncc
-        bun add -d pkg
-        bun add -d pkg-fetch
-    
-    - name: Compile TypeScript and bundle
+        npx -y @vercel/ncc build src/index.ts -o dist --target es2022
+
+    - name: Create pkg entry and build exe
       run: |
-        # Bundle the main file with all dependencies
-        bunx ncc build src/index.ts -o dist --target bun
-        
-        # Create a standalone executable with pkg
-        # Note: You might need to create a separate entry point for pkg
         echo "require('./index.js')" > dist/entry.js
-        bunx pkg dist/entry.js --targets node18-win-x64 --output dist/cf-bypass.exe
-        
+        npx -y pkg dist/entry.js --targets node20-win-x64 --output dist/ts-solver.exe --compress GZip
+      shell: bash
+
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
-        name: cf-bypass-${{ matrix.os }}
-        path: dist/
-        
-    - name: Create Release (on tag)
+        name: ts-solver-${{ matrix.os }}
+        path: dist/ts-solver.exe
+
+    - name: Create Release
       if: startsWith(github.ref, 'refs/tags/')
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       with:
-        files: dist/cf-bypass.exe
+        files: dist/ts-solver.exe
+        generate_release_notes: true
