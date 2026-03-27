@@ -41,7 +41,7 @@ jobs:
     - name: Create pkg entry and build exe
       run: |
         echo "require('./index.js')" > dist/entry.js
-        npx -y pkg dist/entry.js --targets node20-win-x64 --output dist/ts-solver.exe --compress GZip
+        npx -y @yao-pkg/pkg dist/entry.js --targets node20-win-x64 --output dist/ts-solver.exe --compress GZip
       shell: bash
 
     - name: Upload artifact
