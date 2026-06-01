@@ -244,15 +244,61 @@ def compute_srp_proofs(auth_info: dict[str, Any], *, username: str, password: st
     }
 
 
+def parse_request_body(raw_text: str) -> dict[str, Any]:
+    """Parse the request body, handling both valid JSON and malformed nested JSON."""
+    try:
+        body = json.loads(raw_text)
+        if isinstance(body, dict):
+            return body
+    except json.JSONDecodeError:
+        pass
+
+    import re
+    username_match = re.search(r'"username"\s*:\s*"([^"]*)"', raw_text)
+    password_match = re.search(r'"password"\s*:\s*"([^"]*)"', raw_text)
+
+    auth_info_match = re.search(r'"auth_info"\s*:\s*"?({\s*"Code")', raw_text)
+    if not auth_info_match:
+        auth_info_match = re.search(r'"auth_info"\s*:\s*"?({)', raw_text)
+
+    if not auth_info_match or not username_match or not password_match:
+        raise ValueError("Could not extract fields from request body")
+
+    start = auth_info_match.start(1)
+    brace_count = 0
+    end = start
+    for i in range(start, len(raw_text)):
+        if raw_text[i] == '{':
+            brace_count += 1
+        elif raw_text[i] == '}':
+            brace_count -= 1
+            if brace_count == 0:
+                end = i + 1
+                break
+
+    auth_info_str = raw_text[start:end]
+    try:
+        auth_info = json.loads(auth_info_str)
+    except json.JSONDecodeError as e:
+        raise ValueError(f"Failed to parse auth_info JSON: {e}")
+
+    return {
+        "auth_info": auth_info,
+        "username": username_match.group(1),
+        "password": password_match.group(1),
+    }
+
+
 @app.route("/compute", methods=["POST"])
 def compute_endpoint():
-    try:
-        body = request.get_json(force=True)
-    except Exception:
-        return jsonify({"error": "Invalid JSON body"}), 400
-
-    if not body:
+    raw_text = request.get_data(as_text=True)
+    if not raw_text or not raw_text.strip():
         return jsonify({"error": "Empty request body"}), 400
+
+    try:
+        body = parse_request_body(raw_text)
+    except Exception as e:
+        return jsonify({"error": f"Failed to parse request: {str(e)}"}), 400
 
     auth_info_raw = body.get("auth_info")
     username = body.get("username")
