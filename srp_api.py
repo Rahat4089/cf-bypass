@@ -277,6 +277,8 @@ def parse_request_body(raw_text: str) -> dict[str, Any]:
                 break
 
     auth_info_str = raw_text[start:end]
+    auth_info_str = auth_info_str.replace('\r\n', '\\n').replace('\r', '\\n').replace('\n', '\\n')
+    auth_info_str = auth_info_str.replace('\t', '\\t')
     try:
         auth_info = json.loads(auth_info_str)
     except json.JSONDecodeError as e:
@@ -308,8 +310,9 @@ def compute_endpoint():
         return jsonify({"error": "Missing required fields: auth_info, username, password"}), 400
 
     if isinstance(auth_info_raw, str):
+        sanitized = auth_info_raw.replace('\r\n', '\\n').replace('\r', '\\n').replace('\n', '\\n').replace('\t', '\\t')
         try:
-            auth_info = json.loads(auth_info_raw)
+            auth_info = json.loads(sanitized)
         except json.JSONDecodeError:
             return jsonify({"error": "auth_info is not valid JSON"}), 400
     elif isinstance(auth_info_raw, dict):
